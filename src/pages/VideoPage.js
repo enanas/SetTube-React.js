@@ -120,6 +120,11 @@ export default class VideoPage extends Component {
     });
   };
 
+  onChannelClick = () => {
+    this.props.onChannelClick(this.state.channel.id);
+    this.props.handlePage("channel");
+  }
+
   render() {
     return (
       <Grid columns={2}>
@@ -160,6 +165,7 @@ export default class VideoPage extends Component {
                     paddingBottom: "0px",
                     paddingLeft: "0px",
                   }}
+                  onClick={this.onChannelClick}
                 ></Button>
                 <div style={{float: "left", marginLeft: "5px"}}>
                   <Header

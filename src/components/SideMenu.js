@@ -123,6 +123,8 @@ export default class SideMenu extends Component {
                     videoId={this.state.videoId}
                     channelId={this.state.channelId}
                     user={this.props.user}
+                    handlePage={this.props.handlePage}
+                    onChannelClick={this.handleChannelClick}
                   ></VideoPage>
                 ) : this.props.page === "your channels" ? (
                   <MyChannelsPage
