@@ -1,59 +1,49 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import {
-  TransitionablePortal,
   Button,
-  Segment,
-  Form,
+  TransitionablePortal,
   Header,
-  Input,
   List,
+  Form,
+  Segment,
+  Image,
+  Input,
 } from "semantic-ui-react";
 import UserService from "../services/UserService";
 
-export default class SignUpButton extends Component {
+export default class UpdateUserButton extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { error: null, image: null };
+    this.state = { error: null };
   }
 
-  onImageChange = (item) => {
-    this.setState({ image: item.target.files[0] });
-  };
-  handleErrorChange = () => {
-    this.setState({ error: null });
-  };
-
-  handleSignUp = (event) => {
+  handleUserUpdate = (event) => {
     event.preventDefault();
     const data = new FormData(event.target);
-    UserService.add(data)
-      .then((response) => {
-        this.props.onUserChange(response.data.data);
-      })
-      .catch((error) => {
-        if (error.response.data.message != null) {
-          this.setState({ error: error.response.data.message });
-        } else if (error.response.data.errors?.length !== 0) {
-          this.setState({ error: Object.values(error.response.data.errors) });
-        } else {
-          this.setState({ error: error.response.data.status });
-        }
-      });
+    data.append("id", this.props.user.id);
+    UserService.update(data).catch((error) => {
+      if (error.response?.data?.message != null) {
+        this.setState({ error: error.response.data.message });
+      } else if (error.response?.data?.errors?.length !== 0) {
+        this.setState({ error: error.response.data.errors });
+      } else {
+        this.setState({ error: error.response.data.status });
+      }
+    });
+  };
+
+  handleErrorChange = () => {
+    this.setState({ error: null });
   };
 
   render() {
     return (
       <TransitionablePortal
-        closeOnTriggerClick
         openOnTriggerClick
         trigger={
-          <Button
-            inverted
-            style={{ marginLeft: "0.5em" }}
-            onClick={this.handleErrorChange}
-          >
-            Sign Up
+          <Button inverted onClick={this.handleErrorChange}>
+            Update
           </Button>
         }
       >
@@ -66,28 +56,35 @@ export default class SignUpButton extends Component {
             zIndex: 1000,
           }}
         >
-          <Form onSubmit={this.handleSignUp}>
-            <Header textAlign="center">Sign Up</Header>
+          <Form onSubmit={this.handleUserUpdate}>
+            <Header textAlign="center">Update User</Header>
             <Form.Field>
               <label>Name</label>
-              <input type={"text"} name="Name" placeholder="Name" />
+              <input type={"text"} name="Name" defaultValue={this.props.user.name} placeholder="Name" />
             </Form.Field>
             <Form.Field>
               <label>Surname</label>
-              <input type={"text"} name="Surname" placeholder="Surname" />
+              <input type={"text"} name="Surname" defaultValue={this.props.user.surname} placeholder="Surname" />
             </Form.Field>
             <Form.Field>
               <label>Username</label>
-              <input type={"text"} name="Username" placeholder="Username" />
+              <input type={"text"} name="Username" defaultValue={this.props.user.username} placeholder="Username" />
             </Form.Field>
             <Form.Field>
               <label>E-mail</label>
-              <input type={"email"} name="Email" placeholder="E-mail" />
+              <input type={"email"} name="Email" defaultValue={this.props.user.email} placeholder="E-mail" />
             </Form.Field>
             <Form.Field>
               <label>Password</label>
               <input type={"password"} name="Password" placeholder="Password" />
             </Form.Field>
+            <Header as={"h5"} style={{marginTop: "0px", marginBottom: "4px", fontSize: ".92857143em"}}>Current Profile Picture</Header>
+            <Image
+              spaced
+              avatar
+              src={"data:image/png;base64," + this.props.user.profilePicture}
+              style={{marginBottom: "4px"}}
+            ></Image>
             <Form.Field>
               <label>Profile Picture</label>
               <Input
@@ -101,9 +98,9 @@ export default class SignUpButton extends Component {
             {this.state.error != null ? (
               <Header textAlign="center" color="red" size="small">
                 {typeof this.state.error === "string" ? (
-                  <List items={this.state.error.split("\n")}></List>
+                  <List key={0} items={this.state.error.split("\n")}></List>
                 ) : (
-                  <List items={this.state.error}></List>
+                  <List key={0} items={this.state.error}></List>
                 )}
               </Header>
             ) : (

@@ -8,23 +8,23 @@ class CommentService {
     }
 
     add(comment){
-        return axios.post(COMMENT_API_BASE_URL + "Add/", comment);
+        return axios.post(COMMENT_API_BASE_URL, comment);
     }
 
     getById(commentId){
-        return axios.get(COMMENT_API_BASE_URL + 'GetById?id=' + commentId);
+        return axios.get(COMMENT_API_BASE_URL + commentId);
     }
 
     getByVideoId(videoId){
-        return axios.get(COMMENT_API_BASE_URL + 'GetByVideoId?videoId=' + videoId);
+        return axios.get(COMMENT_API_BASE_URL + 'GetByVideoId/' + videoId);
     }
 
     update(comment){
-        return axios.put(COMMENT_API_BASE_URL + 'Update/', comment);
+        return axios.put(COMMENT_API_BASE_URL, comment);
     }
 
     delete(commentId){
-        return axios.delete(COMMENT_API_BASE_URL + 'Delete?id=' + commentId);
+        return axios.delete(COMMENT_API_BASE_URL + commentId);
     }
 }
 

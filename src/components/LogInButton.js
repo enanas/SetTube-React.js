@@ -6,7 +6,8 @@ import {
   Form,
   Header,
 } from "semantic-ui-react";
-import UserService from "../services/UserService"
+import UserService from "../services/UserService";
+import AdminService from "../services/AdminService";
 
 export default class LogInButton extends Component {
   constructor(props) {
@@ -21,18 +22,36 @@ export default class LogInButton extends Component {
 
   handleLogIn = (event) => {
     event.preventDefault();
-    const data = new FormData(event.target);
-    UserService.logIn(data).then((response) =>
-        {this.props.onLogIn(response.data.data);}
-    ).catch( error =>{
-        if(error.response.data.message!=null){
-            this.setState({error: error.response.data.message});
-        } else if(error.response.data.title!=null){
-            this.setState({error: error.response.data.title});
-        } else {
-            this.setState({error: error.response.data.status});
-        }
-    });
+    const data = new FormData();
+    data.append(event.target[0].name, event.target[0].value);
+    data.append(event.target[1].name, event.target[1].value);
+    if (event.target[2].checked) {
+      AdminService.logIn(data)
+        .then((res) => this.props.onAdminLogIn(res.data.data))
+        .catch((error) => {
+          if (error.response?.data?.message != null) {
+            this.setState({ error: error.response.data.message });
+          } else if (error.response?.data?.errors?.length !== 0) {
+            this.setState({ error: error.response.data.errors });
+          } else {
+            this.setState({ error: error.response.data.status });
+          }
+        });
+    } else {
+      UserService.logIn(data)
+        .then((response) => {
+          this.props.onUserChange(response.data.data);
+        })
+        .catch((error) => {
+          if (error.response.data.message != null) {
+            this.setState({ error: error.response.data.message });
+          } else if (error.response.data.errors.length !== 0) {
+            this.setState({ error: error.response.data.errors });
+          } else {
+            this.setState({ error: error.response.data.status });
+          }
+        });
+    }
   };
 
   render() {
@@ -58,13 +77,14 @@ export default class LogInButton extends Component {
           <Form onSubmit={this.handleLogIn}>
             <Header textAlign="center">Log In</Header>
             <Form.Field>
-              <label>User Name</label>
-              <input type={"text"} name="Username" placeholder="User Name" />
+              <label>Username</label>
+              <input type={"text"} name="Username" placeholder="Username" />
             </Form.Field>
             <Form.Field>
               <label>Password</label>
               <input type={"password"} name="Password" placeholder="Password" />
             </Form.Field>
+            <Form.Checkbox label="Admin Log In" type="checkbox" name="Admin" />
             {this.state.error != null ? (
               <Header textAlign="center" color="red" size="small">
                 {this.state.error}

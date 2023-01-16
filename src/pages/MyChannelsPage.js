@@ -51,8 +51,11 @@ export default class MyChannelsPage extends Component {
 
   componentDidUpdate() {
     if (this.props.user != null) {
+      var user = this.props.user;
       ChannelService.getByUserId(this.props.user.id).then((res) => {
         this.setState({ channels: res.data.data });
+        user.channels = res.data.data;
+        this.props.onUserChange(user);
       });
     }
   }
@@ -66,7 +69,7 @@ export default class MyChannelsPage extends Component {
   };
 
   loadMore = () => {
-    if (this.state.records >= this.state.channels.length) {
+    if (this.state.records > this.state.channels.length) {
       this.setState({ hasMore: false });
     } else {
       setTimeout(() => {
@@ -91,6 +94,12 @@ export default class MyChannelsPage extends Component {
           key={currentChannel.id}
           id={currentChannel.id}
           onClick={this.handleChannelClick}
+          style={{
+            marginTop: "14px",
+            marginLeft: "14px",
+            marginBottom: "14px",
+            marginRight: "14px",
+          }}
         >
           <Card.Content>
             <Image
@@ -140,7 +149,7 @@ export default class MyChannelsPage extends Component {
         });
       })
       .catch((error) => {
-        console.log(error.response.data);
+        console.log(error);
         if (error.response.data.message != null) {
           this.setState({ error: error.response.data.message });
         } else if (error.response.data.title != null) {
@@ -159,8 +168,8 @@ export default class MyChannelsPage extends Component {
             <Header inverted>
               You must be logged-in to check your channels!
             </Header>
-            <LogInButton onLogIn={this.props.onLogIn}></LogInButton>
-            <SignUpButton onSignUp={this.props.onSignUp}></SignUpButton>
+            <LogInButton onUserChange={this.props.onUserChange}></LogInButton>
+            <SignUpButton onUserChange={this.props.onUserChange}></SignUpButton>
           </Container>
         ) : this.state.channels.length === 0 ? (
           <Container textAlign="center" style={{ marginTop: "15%" }}>
@@ -220,7 +229,7 @@ export default class MyChannelsPage extends Component {
             </TransitionablePortal>
           </Container>
         ) : (
-          <Container textAlign="center" style={{ marginTop: "15%" }}>
+          <Container textAlign="center" style={{ marginTop: "10%" }}>
             <TransitionablePortal
               closeOnTriggerClick
               openOnTriggerClick
@@ -238,7 +247,7 @@ export default class MyChannelsPage extends Component {
                 style={{
                   left: "37.5%",
                   position: "fixed",
-                  top: "20%",
+                  top: "25%",
                   width: "25%",
                   zIndex: 1000,
                 }}
@@ -276,17 +285,25 @@ export default class MyChannelsPage extends Component {
                 </Form>
               </Segment>
             </TransitionablePortal>
-            <InfiniteScroll
-              allowFullScreen
-              pageStart={0}
-              loadMore={this.loadMore}
-              hasMore={this.state.hasMore}
-              loader={<Loader key={0} active></Loader>}
-              useWindow={false}
-              style={{ overflowY: "scroll" }}
-            >
-              {this.showItems(this.state.channels)}
-            </InfiniteScroll>
+              <InfiniteScroll
+                datalength={this.state.channels.length}
+                pageStart={0}
+                loadMore={this.loadMore}
+                hasMore={this.state.hasMore}
+                loader={<Loader key={0} active></Loader>}
+                useWindow={false}
+                style={{
+                  overflowY: "scroll",
+                  height: "200px",
+                  width: "100%",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {this.showItems(this.state.channels)}
+              </InfiniteScroll>
           </Container>
         )}
       </>

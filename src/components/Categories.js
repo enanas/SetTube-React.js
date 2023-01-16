@@ -21,7 +21,7 @@ export default class Categories extends Component {
   render() {
     const activeItem = this.state.activeItem;
     return (
-      <Segment inverted>
+      <Segment inverted style={{display: "flex", justifyContent: "center"}}>
         {this.state.loadingCategories ? (
           <Loader active>Waiting categories...</Loader>
         ) : (
@@ -30,9 +30,9 @@ export default class Categories extends Component {
               <Menu.Item
                 key={element.id}
                 name={element.name}
-                color="grey"
                 active={activeItem === element.name}
                 onClick={this.handleItemClick}
+                style={activeItem !== element.name ? {backgroundColor: "#8C8C8C"}: {}}
               />
             ))}
           </Menu>

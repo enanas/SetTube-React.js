@@ -8,27 +8,31 @@ class VideoService {
     }
 
     add(video){
-        return axios.post(VIDEO_API_BASE_URL + "Add/", video);
+        return axios.post(VIDEO_API_BASE_URL, video);
     }
 
     getById(videoId){
-        return axios.get(VIDEO_API_BASE_URL + 'GetById?id=' + videoId);
+        return axios.get(VIDEO_API_BASE_URL + videoId);
+    }
+
+    getSubscribedChannelVideos(userId){
+        return axios.get(VIDEO_API_BASE_URL + 'GetSubscribedChannelVideos/' + userId);
     }
 
     getByChannelId(channelId){
-        return axios.get(VIDEO_API_BASE_URL + 'GetByChannelId?channelId=' + channelId);
+        return axios.get(VIDEO_API_BASE_URL + 'GetByChannelId/' + channelId);
     }
 
     getByCategoryId(categoryId){
-        return axios.get(VIDEO_API_BASE_URL + 'GetByCategoryId?categoryId=' + categoryId);
+        return axios.get(VIDEO_API_BASE_URL + 'GetByCategoryId/' + categoryId);
     }
 
     update(video){
-        return axios.put(VIDEO_API_BASE_URL + 'Update/', video);
+        return axios.put(VIDEO_API_BASE_URL, video);
     }
 
     delete(videoId){
-        return axios.delete(VIDEO_API_BASE_URL + 'Delete?id=' + videoId);
+        return axios.delete(VIDEO_API_BASE_URL + videoId);
     }
 }
 

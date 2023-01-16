@@ -8,23 +8,23 @@ class ChannelService {
     }
 
     add(channel){
-        return axios.post(CHANNEL_API_BASE_URL + "Add/", channel);
+        return axios.post(CHANNEL_API_BASE_URL, channel);
     }
 
     getById(channelId){
-        return axios.get(CHANNEL_API_BASE_URL + 'GetById?id=' + channelId);
+        return axios.get(CHANNEL_API_BASE_URL + channelId);
     }
 
     getByUserId(userId){
-        return axios.get(CHANNEL_API_BASE_URL + 'GetByUserId?userId=' + userId);
+        return axios.get(CHANNEL_API_BASE_URL + 'GetByUserId/' + userId);
     }
 
     update(channel){
-        return axios.put(CHANNEL_API_BASE_URL + 'Update/', channel);
+        return axios.put(CHANNEL_API_BASE_URL, channel);
     }
 
     delete(channelId){
-        return axios.delete(CHANNEL_API_BASE_URL + 'Delete?id=' + channelId);
+        return axios.delete(CHANNEL_API_BASE_URL + channelId);
     }
 }
 

@@ -1,16 +1,16 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import {
-  TransitionablePortal,
   Button,
   Segment,
   Form,
   Header,
+  TransitionablePortal,
   Input,
-  List,
+  List
 } from "semantic-ui-react";
 import UserService from "../services/UserService";
 
-export default class SignUpButton extends Component {
+export default class AddUserButton extends Component {
   constructor(props) {
     super(props);
 
@@ -20,40 +20,32 @@ export default class SignUpButton extends Component {
   onImageChange = (item) => {
     this.setState({ image: item.target.files[0] });
   };
+
   handleErrorChange = () => {
     this.setState({ error: null });
   };
 
-  handleSignUp = (event) => {
+  handleAddUser = (event) => {
     event.preventDefault();
     const data = new FormData(event.target);
-    UserService.add(data)
-      .then((response) => {
-        this.props.onUserChange(response.data.data);
-      })
-      .catch((error) => {
-        if (error.response.data.message != null) {
-          this.setState({ error: error.response.data.message });
-        } else if (error.response.data.errors?.length !== 0) {
-          this.setState({ error: Object.values(error.response.data.errors) });
-        } else {
-          this.setState({ error: error.response.data.status });
-        }
-      });
+    UserService.add(data).catch((error) => {
+      if (error.response.data.message != null) {
+        this.setState({ error: error.response.data.message });
+      } else if (error.response.data.errors?.length !== 0) {
+        this.setState({ error: Object.values(error.response.data.errors) });
+      } else {
+        this.setState({ error: error.response.data.status });
+      }
+    });
   };
 
   render() {
     return (
       <TransitionablePortal
-        closeOnTriggerClick
         openOnTriggerClick
         trigger={
-          <Button
-            inverted
-            style={{ marginLeft: "0.5em" }}
-            onClick={this.handleErrorChange}
-          >
-            Sign Up
+          <Button inverted onClick={this.handleErrorChange}>
+            Add
           </Button>
         }
       >
@@ -66,8 +58,8 @@ export default class SignUpButton extends Component {
             zIndex: 1000,
           }}
         >
-          <Form onSubmit={this.handleSignUp}>
-            <Header textAlign="center">Sign Up</Header>
+          <Form onSubmit={this.handleAddUser}>
+            <Header textAlign="center">Add User</Header>
             <Form.Field>
               <label>Name</label>
               <input type={"text"} name="Name" placeholder="Name" />

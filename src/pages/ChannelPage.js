@@ -37,6 +37,7 @@ export default class ChannelPage extends Component {
       categories: [],
       selectedCategoryId: null,
       videoDuration: -1,
+      addPortalOpen: false,
     };
   }
 
@@ -76,10 +77,21 @@ export default class ChannelPage extends Component {
           key={currentVideo.id}
           id={sendData}
           onClick={this.handleVideoClick}
+          style={{
+            marginTop: "14px",
+            marginLeft: "14px",
+            marginBottom: "14px",
+            marginRight: "14px",
+            width: "300px",
+          }}
         >
           <Image
             src={"data:image/png;base64," + currentVideo.cover}
             ui={false}
+            style={{
+              width: "300px",
+              height: "170px",
+            }}
           ></Image>
           <Grid columns={1}>
             <GridColumn width={14}>
@@ -124,6 +136,7 @@ export default class ChannelPage extends Component {
 
   handleErrorChange = () => {
     this.setState({ error: null });
+    this.setState({ addPortalOpen: true });
     if (this.state.categories.length === 0) {
       CategoryService.getAll().then((res) => {
         this.setState({
@@ -138,15 +151,9 @@ export default class ChannelPage extends Component {
   handleAddVideo = (event) => {
     event.preventDefault();
     const data = new FormData(event.target);
-    data.forEach((element) => {
-      console.log(element);
-    });
     data.append("length", parseInt(this.state.videoDuration));
     data.append("channelId", this.state.channel.id);
     data.append("categoryId", this.state.selectedCategoryId);
-    data.forEach((element) => {
-      console.log(element);
-    });
     VideoService.add(data)
       .then((response) => {
         this.setState({
@@ -162,6 +169,7 @@ export default class ChannelPage extends Component {
           this.setState({ error: error.response.data.status });
         }
       });
+    this.setState({ addPortalOpen: false });
   };
 
   handleDropdownChange = (event, { children, ...data }) => {
@@ -185,7 +193,10 @@ export default class ChannelPage extends Component {
     };
     reader.readAsDataURL(event.target.files[0]);
     var timer = setInterval(() => {
-      if (this.state.videoDuration === -1 || this.state.videoDuration === undefined) {
+      if (
+        this.state.videoDuration === -1 ||
+        this.state.videoDuration === undefined
+      ) {
         this.setState({ videoDuration: duration });
         console.log(duration);
       } else {
@@ -194,159 +205,236 @@ export default class ChannelPage extends Component {
     }, 500);
   };
 
+  handleSubscribe = (event, { children, ...data }) => {
+    if (data.active) {
+      this.props.onUnsubscribeClick(this.state.channel);
+    } else {
+      this.props.onSubscribeClick(this.state.channel);
+    }
+  };
+
   render() {
     const channel = this.state.channel;
     return (
-      <Container textAlign="center" style={{ marginTop: "10%" }}>
-        <Grid columns={2}>
-          <GridColumn>
-            <Image
-              floated="left"
-              circular
-              inline
-              src={"data:image/png;base64," + channel?.channelPicture}
-              style={{
-                height: "80px",
-                width: "80px",
-                marginLeft: "12px",
-                marginTop: "12px",
-                paddingLeft: "0px",
-                paddingRight: "0px",
-              }}
-            ></Image>
-            <div
-              style={{ float: "left", marginLeft: "5px", marginTop: "24px" }}
-            >
-              <Header
-                as="h4"
+      <>
+        <Container textAlign="center" style={{ marginTop: "10%" }}>
+          <Grid columns={2}>
+            <GridColumn>
+              <Image
+                floated="left"
+                circular
+                inline
+                src={"data:image/png;base64," + channel?.channelPicture}
                 style={{
-                  marginTop: "0px",
-                  marginBottom: "0px",
-                  color: "grey",
+                  height: "80px",
+                  width: "80px",
+                  marginLeft: "12px",
+                  marginTop: "12px",
+                  paddingLeft: "0px",
+                  paddingRight: "0px",
                 }}
+              ></Image>
+              <div
+                style={{ float: "left", marginLeft: "5px", marginTop: "24px" }}
               >
-                {channel?.channelName}
-              </Header>
-              <p style={{ color: "grey", marginBottom: "0px" }}>
-                @{this.state.userOfChannel?.username}
-              </p>
-              <p style={{ color: "grey" }}>{channel?.subscriberCount} subs</p>
-            </div>
-          </GridColumn>
-          <GridColumn>
-            <TransitionablePortal
-              closeOnTriggerClick
-              openOnTriggerClick
-              trigger={
-                <Button
-                  size="large"
-                  floated="right"
-                  compact
-                  circular
-                  style={{ marginTop: "32px" }}
-                  inverted
-                  onClick={this.handleErrorChange}
+                <Header
+                  as="h4"
+                  style={{
+                    marginTop: "0px",
+                    marginBottom: "0px",
+                    color: "grey",
+                  }}
                 >
-                  Add Video
-                </Button>
-              }
+                  {channel?.channelName}
+                </Header>
+                <p style={{ color: "grey", marginBottom: "0px" }}>
+                  @{this.state.userOfChannel?.username}
+                </p>
+                <p style={{ color: "grey" }}>{channel?.subscriberCount} subs</p>
+              </div>
+            </GridColumn>
+            <GridColumn>
+              {this.props.user.channels.filter(
+                (channel) => channel.id === this.state.channel?.id
+              ).length !== 0 ? (
+                <TransitionablePortal
+                  closeOnTriggerClick
+                  openOnTriggerClick
+                  open={this.state.addPortalOpen}
+                  onClose={() => this.setState({ addPortalOpen: false })}
+                  trigger={
+                    <Button
+                      size="large"
+                      floated="right"
+                      compact
+                      circular
+                      style={{ marginTop: "32px" }}
+                      inverted
+                      onClick={this.handleErrorChange}
+                    >
+                      Add Video
+                    </Button>
+                  }
+                >
+                  <Segment
+                    style={{
+                      left: "37.5%",
+                      position: "fixed",
+                      top: "20%",
+                      width: "25%",
+                      zIndex: 1000,
+                    }}
+                  >
+                    <Form onSubmit={this.handleAddVideo}>
+                      <Header textAlign="center">Add Video</Header>
+                      <Form.Field>
+                        <label>Title</label>
+                        <input type={"text"} name="Title" placeholder="Title" />
+                      </Form.Field>
+                      <Form.TextArea
+                        label="Description"
+                        style={{
+                          height: "10%",
+                        }}
+                        name="Description"
+                      />
+                      <Form.Field>
+                        <label>Cover</label>
+                        <Input
+                          icon={"picture"}
+                          type={"file"}
+                          name="Cover"
+                          accept="image/*"
+                        />
+                      </Form.Field>
+                      <Form.Field>
+                        <label>Video</label>
+                        <Input
+                          icon={"file video"}
+                          type={"file"}
+                          name="Video"
+                          accept="video/*"
+                          id="video"
+                          onChange={this.handleVideoChange}
+                        />
+                      </Form.Field>
+                      <Form.Field
+                        label="Category"
+                        control={Select}
+                        placeholder="Category"
+                        options={this.state.categories.map((category) => {
+                          return {
+                            key: category.id,
+                            text: category.name,
+                            value: category.id,
+                          };
+                        })}
+                        onChange={this.handleDropdownChange}
+                      />
+                      {this.state.error != null ? (
+                        <Header textAlign="center" color="red" size="small">
+                          {this.state.error}
+                        </Header>
+                      ) : (
+                        <></>
+                      )}
+                      <Button fluid type="submit">
+                        Submit
+                      </Button>
+                    </Form>
+                  </Segment>
+                </TransitionablePortal>
+              ) : (
+                <></>
+              )}
+              {this.props.user != null ? (
+                this.props.user.channels.filter(
+                  (channel) => channel.id === this.state.channel?.id
+                ).length === 0 ? (
+                  <Button
+                    size="large"
+                    floated="right"
+                    inverted
+                    compact
+                    circular
+                    style={{ marginTop: "32px" }}
+                    onClick={this.handleSubscribe}
+                    active={this.props.isSubscribed}
+                  >
+                    {this.props.isSubscribed ? "Subscribed" : "Subscribe"}
+                  </Button>
+                ) : (
+                  <></>
+                )
+              ) : (
+                <TransitionablePortal
+                  openOnTriggerClick
+                  trigger={
+                    <Button
+                      size="large"
+                      floated="right"
+                      inverted
+                      compact
+                      circular
+                      style={{ marginTop: "32px" }}
+                    >
+                      Subscribe
+                    </Button>
+                  }
+                >
+                  <Segment
+                    style={{
+                      left: "37.5%",
+                      position: "fixed",
+                      top: "30%",
+                      width: "25%",
+                      zIndex: 1000,
+                    }}
+                  >
+                    <Header textAlign="center">
+                      You must log in or sign up before subscribing.
+                    </Header>
+                  </Segment>
+                </TransitionablePortal>
+              )}
+            </GridColumn>
+          </Grid>
+          <Divider></Divider>
+        </Container>
+        <Container
+          style={{
+            width: "fit-content",
+            paddingLeft: "10%",
+            paddingRight: "10%",
+          }}
+        >
+          <Segment inverted>
+            <Card.Group
+              itemsPerRow={this.state.videoNum}
+              style={{ marginTop: "0px" }}
             >
-              <Segment
+              <InfiniteScroll
+                pageStart={0}
+                loadMore={this.loadMore}
+                hasMore={this.state.hasMore}
+                loader={<Loader key={0} active></Loader>}
+                useWindow={false}
                 style={{
-                  left: "37.5%",
-                  position: "fixed",
-                  top: "20%",
-                  width: "25%",
-                  zIndex: 1000,
+                  overflowY: "scroll",
+                  height: "500px",
+                  width: "100%",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <Form onSubmit={this.handleAddVideo}>
-                  <Header textAlign="center">Add Video</Header>
-                  <Form.Field>
-                    <label>Title</label>
-                    <input type={"text"} name="Title" placeholder="Title" />
-                  </Form.Field>
-                  <Form.TextArea
-                    label="Description"
-                    style={{
-                      height: "10%",
-                    }}
-                    name="Description"
-                  />
-                  <Form.Field>
-                    <label>Cover</label>
-                    <Input
-                      icon={"picture"}
-                      type={"file"}
-                      name="Cover"
-                      accept="image/*"
-                    />
-                  </Form.Field>
-                  <Form.Field>
-                    <label>Video</label>
-                    <Input
-                      icon={"file video"}
-                      type={"file"}
-                      name="Video"
-                      accept="video/*"
-                      id="video"
-                      onChange={this.handleVideoChange}
-                    />
-                  </Form.Field>
-                  <Form.Field
-                    label="Category"
-                    control={Select}
-                    placeholder="Category"
-                    options={this.state.categories.map((category) => {
-                      return {
-                        key: category.id,
-                        text: category.name,
-                        value: category.id,
-                      };
-                    })}
-                    onChange={this.handleDropdownChange}
-                  />
-                  {this.state.error != null ? (
-                    <Header textAlign="center" color="red" size="small">
-                      {this.state.error}
-                    </Header>
-                  ) : (
-                    <></>
-                  )}
-                  <Button fluid type="submit">
-                    Submit
-                  </Button>
-                </Form>
-              </Segment>
-            </TransitionablePortal>
-            <Button
-              size="large"
-              floated="right"
-              inverted
-              compact
-              circular
-              style={{ marginTop: "32px" }}
-            >
-              Subscribe
-            </Button>
-          </GridColumn>
-        </Grid>
-        <Divider></Divider>
-        <Card.Group
-          itemsPerRow={this.state.videoNum}
-          style={{ marginTop: "0px" }}
-        >
-          <InfiniteScroll
-            pageStart={0}
-            loadMore={this.loadMore}
-            hasMore={this.state.hasMore}
-            loader={<Loader key={0} active></Loader>}
-            useWindow={false}
-          >
-            {this.showItems(this.state.videos)}
-          </InfiniteScroll>
-        </Card.Group>
-      </Container>
+                {this.showItems(this.state.videos)}
+              </InfiniteScroll>
+            </Card.Group>
+          </Segment>
+        </Container>
+      </>
     );
   }
 }

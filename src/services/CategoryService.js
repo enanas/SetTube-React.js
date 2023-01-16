@@ -7,20 +7,20 @@ class CategoryService {
         return axios.get(CATEGORY_API_BASE_URL);
     }
 
-    add(category){
-        return axios.post(CATEGORY_API_BASE_URL + "Add/", category);
+    add(category, userId){
+        return axios.post(CATEGORY_API_BASE_URL + "?userId=" + userId, category);
     }
 
     getById(categoryId){
-        return axios.get(CATEGORY_API_BASE_URL + 'GetById?id=' + categoryId);
+        return axios.get(CATEGORY_API_BASE_URL + categoryId);
     }
 
     update(category){
-        return axios.put(CATEGORY_API_BASE_URL + 'Update/', category);
+        return axios.put(CATEGORY_API_BASE_URL, category);
     }
 
     delete(categoryId){
-        return axios.delete(CATEGORY_API_BASE_URL + 'Delete?id=' + categoryId);
+        return axios.delete(CATEGORY_API_BASE_URL + categoryId);
     }
 }
 
